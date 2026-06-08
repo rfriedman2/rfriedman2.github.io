@@ -308,13 +308,95 @@ function renderExercises(day) {
       </div>
       <div class="exercise-card-body">${setsHTML}
         <span class="notes-label">Notes</span>
-        <textarea class="notes-input" id="e${ei}n" placeholder="e.g. felt strong, add 5 lbs next time"></textarea>
+        <textarea class="notes-input" id="e${ei}n" placeholder="e.g. felt strong, add 5 lbs next time" oninput="saveDraft()"></textarea>
       </div>`;
+    // Add input listeners to save draft on every change
+    card.querySelectorAll && setTimeout(() => {
+      for (let s = 0; s < ex.sets; s++) {
+        const w = document.getElementById(`e${ei}s${s}w`);
+        const r = document.getElementById(`e${ei}s${s}r`);
+        if (w) w.addEventListener('input', saveDraft);
+        if (r) r.addEventListener('input', saveDraft);
+      }
+    }, 100);
     c.appendChild(card);
   });
 }
 
-function toggleCheck(ei, si) { document.getElementById(`e${ei}s${si}c`).classList.toggle('done'); }
+function toggleCheck(ei, si) { 
+  document.getElementById(`e${ei}s${si}c`).classList.toggle('done');
+  saveDraft();
+}
+
+// ═══════════════════════════════════════
+// AUTO-SAVE DRAFT — saves in-progress workout every 30 seconds
+// Restores automatically if page reloads during rest period
+// ═══════════════════════════════════════
+function saveDraft() {
+  if (selectedDay === null) return;
+  const day = DAYS[selectedDay];
+  const date = document.getElementById('workout-date').value;
+  const draft = {
+    dayIndex: selectedDay,
+    date: date,
+    exercises: day.exercises.map((ex, ei) => ({
+      sets: Array.from({length: ex.sets}, (_, s) => ({
+        weight: document.getElementById(`e${ei}s${s}w`)?.value || '',
+        reps:   document.getElementById(`e${ei}s${s}r`)?.value || '',
+        done:   document.getElementById(`e${ei}s${s}c`)?.classList.contains('done') || false
+      })),
+      notes: document.getElementById(`e${ei}n`)?.value || ''
+    }))
+  };
+  localStorage.setItem('gritiron60_draft', JSON.stringify(draft));
+}
+
+function restoreDraft() {
+  const draftStr = localStorage.getItem('gritiron60_draft');
+  if (!draftStr) return;
+  try {
+    const draft = JSON.parse(draftStr);
+    if (draft.dayIndex === null || draft.dayIndex === undefined) return;
+
+    // Re-select the day
+    const btn = document.querySelectorAll('.day-btn')[draft.dayIndex];
+    if (btn) selectDay(draft.dayIndex, btn);
+
+    // Restore date
+    if (draft.date) document.getElementById('workout-date').value = draft.date;
+
+    // Restore inputs after short delay to let DOM render
+    setTimeout(() => {
+      const day = DAYS[draft.dayIndex];
+      draft.exercises.forEach((exData, ei) => {
+        exData.sets.forEach((set, s) => {
+          const wEl = document.getElementById(`e${ei}s${s}w`);
+          const rEl = document.getElementById(`e${ei}s${s}r`);
+          const cEl = document.getElementById(`e${ei}s${s}c`);
+          if (wEl && set.weight) wEl.value = set.weight;
+          if (rEl && set.reps)   rEl.value = set.reps;
+          if (cEl && set.done)   cEl.classList.add('done');
+        });
+        const nEl = document.getElementById(`e${ei}n`);
+        if (nEl && exData.notes) nEl.value = exData.notes;
+      });
+
+      // Show restore notification
+      showToast('✓ Draft restored — your workout is back', 'success');
+    }, 200);
+  } catch(e) {
+    console.log('Draft restore failed:', e);
+  }
+}
+
+function clearDraft() {
+  localStorage.removeItem('gritiron60_draft');
+}
+
+// Auto-save every 30 seconds if a workout is in progress
+setInterval(() => {
+  if (selectedDay !== null) saveDraft();
+}, 30000);
 
 // ═══════════════════════════════════════
 // SAVE & SYNC TO GOOGLE SHEETS
@@ -340,6 +422,7 @@ async function saveWorkout() {
   // Save locally first
   sessions.unshift(session);
   localStorage.setItem('gritiron60_v5', JSON.stringify(sessions));
+  clearDraft(); // Clear draft after successful save
 
   // Sync to Google Sheets via CORS-friendly method
   setSyncStatus('syncing', 'Syncing to Google Sheets...');
@@ -520,6 +603,8 @@ function showToast(msg, type='success') {
 }
 
 init();
+// Restore any in-progress workout draft
+restoreDraft();
 </script>
 </body>
 </html>
