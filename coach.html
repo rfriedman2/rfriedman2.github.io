@@ -312,7 +312,9 @@ async function loadData() {
     // Update stats
     document.getElementById('statSessions').textContent = sessionOrder.length;
     document.getElementById('statSets').textContent = data.length;
-    document.getElementById('statDays').textContent = dayOrder.length;
+    var uniqueDates = {};
+    data.forEach(function(row) { if (row.date) uniqueDates[row.date] = true; });
+    document.getElementById('statDays').textContent = Object.keys(uniqueDates).length;
     
     // Build HTML
     var html = '';
