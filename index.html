@@ -521,7 +521,8 @@ async function saveWorkout() {
   document.getElementById('save-btn').disabled = false;
 
   if (synced) {
-    setSyncStatus('success', 'Saved & synced to Google Sheets ✓');
+    const notePreview = session.sessionNotes ? ` (Notes: "${session.sessionNotes.slice(0,30)}${session.sessionNotes.length>30?'…':''}")` : ' (no notes entered)';
+    setSyncStatus('success', `Saved & synced ✓${notePreview}`);
     showToast('✓ Saved & Synced!', 'success');
   } else {
     setSyncStatus('error', 'Sync failed — saved on this phone. Retry from History tab.');
