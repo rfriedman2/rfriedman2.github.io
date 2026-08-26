@@ -47,10 +47,11 @@ body { background:#fff; color:#111; font-family:'Lato',sans-serif; font-size:17p
 .exercise-card-tempo { font-family:'DM Mono',monospace; font-size:12px; color:#0a4a7a; margin-top:3px; font-weight:700; }
 .exercise-card-body { padding:14px 16px 16px; }
 
-.col-header { display:grid; grid-template-columns:36px 1fr 1fr 36px; gap:8px; margin-bottom:8px; }
+.col-header { display:grid; grid-template-columns:56px 1fr 1fr 36px; gap:8px; margin-bottom:8px; }
 .col-header span { font-family:'DM Mono',monospace; font-size:11px; color:#555; text-transform:uppercase; letter-spacing:1px; font-weight:700; }
-.set-row { display:grid; grid-template-columns:36px 1fr 1fr 36px; align-items:center; gap:8px; margin-bottom:10px; }
+.set-row { display:grid; grid-template-columns:56px 1fr 1fr 36px; align-items:center; gap:8px; margin-bottom:10px; }
 .set-label { font-family:'DM Mono',monospace; font-size:13px; color:#555; font-weight:700; }
+.set-last { font-family:'DM Mono',monospace; font-size:10px; color:#999; font-weight:400; margin-top:2px; white-space:nowrap; }
 .set-input { background:#f5f5f5; border:2px solid #ccc; border-radius:8px; padding:11px 10px; font-family:'Lato',sans-serif; font-size:17px; color:#111; width:100%; outline:none; -webkit-appearance:none; font-weight:700; transition:border-color .15s; }
 .set-input:focus { border-color:#c9a030; background:#fff; }
 .set-input::placeholder { color:#bbb; font-size:15px; font-weight:400; }
@@ -143,6 +144,10 @@ body { background:#fff; color:#111; font-family:'Lato',sans-serif; font-size:17p
       <input type="number" class="date-input" id="workout-duration" placeholder="minutes" inputmode="numeric" style="max-width:100px">
       <span style="font-family:DM Mono,monospace;font-size:12px;color:#555;font-weight:700">MIN</span>
     </div>
+    <div style="margin-bottom:14px">
+      <span class="notes-label" style="margin-top:0">Session Notes</span>
+      <textarea class="notes-input" id="session-notes" placeholder="e.g. which gym, how you felt overall" style="min-height:48px" oninput="saveDraft()"></textarea>
+    </div>
     <div id="exercises-container"></div>
     <!-- CARDIO SECTION -->
     <div class="exercise-card" style="margin-bottom:16px">
@@ -234,8 +239,9 @@ const DAYS = [
     exercises:[
       { name:'Incline Dumbbell Press',      sets:4, reps:'12-10-8-8',      tempo:'3s lower · 1s pause · 1s press' },
       { name:'Machine Chest Press',         sets:3, reps:'12-10-8',        tempo:'3s lower · 1s pause · 1s press' },
+      { name:'Machine Incline Press',       sets:4, reps:'12',             tempo:'3s lower · 1s pause · 1s press' },
       { name:'Cable Fly (High-to-Low)',     sets:3, reps:'12',             tempo:'3s lower · 1s squeeze · 1s up' },
-      { name:'Cable Fly (Low-to-High)',     sets:3, reps:'12',             tempo:'3s lower · 1s squeeze · 1s up' },
+      { name:'Pectoral Machine',            sets:3, reps:'12',             tempo:'3s lower · 1s squeeze · 1s up' },
       { name:'Dumbbell Pullover',           sets:3, reps:'12',             tempo:'3s lower · 1s hold · 1s return' },
     ]
   },
@@ -247,6 +253,7 @@ const DAYS = [
       { name:'Seated Cable Row',            sets:4, reps:'12',             tempo:'3s return · 2s hold · 1s pull' },
       { name:'Single-Arm Dumbbell Row',     sets:4, reps:'12-10-8-6',     tempo:'3s lower · 1s pause · 1s row' },
       { name:'Hammer Strength High Row',    sets:3, reps:'12',             tempo:'3s return · 1s squeeze · 1s pull' },
+      { name:'Pull Ups',                    sets:3, reps:'12',             tempo:'2s lower · 1s hold top · 1s pull' },
       { name:'Face Pulls',                  sets:3, reps:'20',             tempo:'2s return · 1s hold · 1s pull' },
     ]
   },
@@ -280,7 +287,7 @@ const DAYS = [
   {
     num:'05', name:'Shoulders & Abs', focus:'Overhead Push · Sunday',
     exercises:[
-      { name:'Seated DB Shoulder Press',    sets:4, reps:'12-10-8-8', tempo:'3s lower · 1s pause · 1s press' },
+      { name:'Seated Arnold Press',          sets:4, reps:'12-10-8-8', tempo:'3s lower · 1s rotate · 1s press' },
       { name:'Cable Lateral Raise',         sets:4, reps:'15',         tempo:'3s lower · 1s hold top · 1s raise' },
       { name:'Reverse Pec Deck',            sets:3, reps:'15',         tempo:'3s return · 1s squeeze · 1s open' },
       { name:'Cable Upright Row',           sets:3, reps:'12',         tempo:'3s lower · 1s hold · 1s pull' },
@@ -338,6 +345,16 @@ function selectDay(i, btn) {
   setTimeout(() => document.getElementById('workout-form').scrollIntoView({behavior:'smooth',block:'start'}), 100);
 }
 
+// Finds the most recent saved session that logged this exercise (by name),
+// regardless of which day it fell on. Sessions are stored most-recent-first.
+function getLastPerformance(exName) {
+  for (const s of sessions) {
+    const ex = s.exercises && s.exercises.find(e => e.name === exName);
+    if (ex) return ex;
+  }
+  return null;
+}
+
 function renderExercises(day) {
   const c = document.getElementById('exercises-container');
   c.innerHTML = '';
@@ -346,10 +363,15 @@ function renderExercises(day) {
     return;
   }
   day.exercises.forEach((ex, ei) => {
+    const lastEx = getLastPerformance(ex.name);
     let setsHTML = `<div class="col-header"><span></span><span>Wt (lbs)</span><span>Reps</span><span>✓</span></div>`;
     for (let s=0; s<ex.sets; s++) {
+      const lastSet = lastEx && lastEx.sets && lastEx.sets[s];
+      const lastLine = (lastSet && (lastSet.weight || lastSet.reps))
+        ? `<div class="set-last">${lastSet.weight ? lastSet.weight : '—'}×${lastSet.reps ? lastSet.reps : '—'}</div>`
+        : '';
       setsHTML += `<div class="set-row">
-        <span class="set-label">S${s+1}</span>
+        <div class="set-label">S${s+1}${lastLine}</div>
         <input type="number" class="set-input" placeholder="lbs" id="e${ei}s${s}w" inputmode="decimal">
         <input type="number" class="set-input" placeholder="${ex.reps}" id="e${ei}s${s}r" inputmode="numeric">
         <div class="set-check" id="e${ei}s${s}c" onclick="toggleCheck(${ei},${s})">✓</div>
@@ -394,6 +416,7 @@ function saveDraft() {
   const draft = {
     dayIndex: selectedDay,
     date: date,
+    sessionNotes: document.getElementById('session-notes')?.value || '',
     exercises: day.exercises.map((ex, ei) => ({
       sets: Array.from({length: ex.sets}, (_, s) => ({
         weight: document.getElementById(`e${ei}s${s}w`)?.value || '',
@@ -417,6 +440,7 @@ function restoreDraft() {
     if (btn) selectDay(draft.dayIndex, btn);
 
     if (draft.date) document.getElementById('workout-date').value = draft.date;
+    if (draft.sessionNotes) document.getElementById('session-notes').value = draft.sessionNotes;
 
     setTimeout(() => {
       const day = DAYS[draft.dayIndex];
@@ -456,6 +480,7 @@ async function saveWorkout() {
   const date = document.getElementById('workout-date').value;
   if (!date) { alert('Please select a date.'); return; }
   const duration = document.getElementById('workout-duration').value || '';
+  const sessionNotes = document.getElementById('session-notes').value || '';
   const cardio = {
     type:      document.getElementById('cardio-type').value || '',
     duration:  document.getElementById('cardio-duration').value || '',
@@ -480,7 +505,7 @@ async function saveWorkout() {
     notes: document.getElementById(`e${ei}n`).value||''
   }));
 
-  const session = {id:Date.now(), date, duration, cardio, dayIndex:selectedDay, dayName:day.name, exercises};
+  const session = {id:Date.now(), date, duration, sessionNotes, cardio, dayIndex:selectedDay, dayName:day.name, exercises};
 
   sessions.unshift(session);
   localStorage.setItem('gritiron60_v5', JSON.stringify(sessions));
@@ -502,6 +527,7 @@ async function saveWorkout() {
   }
 
   document.getElementById('workout-duration').value = '';
+  document.getElementById('session-notes').value = '';
   document.getElementById('cardio-type').value = '';
   document.getElementById('cardio-duration').value = '';
   document.getElementById('cardio-intensity').value = '';
@@ -562,7 +588,7 @@ async function syncToSheets(session) {
         method: 'POST',
         mode: 'no-cors',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({rows, duration: session.duration || '', cardio: session.cardio || {}})
+        body: JSON.stringify({rows, duration: session.duration || '', sessionNotes: session.sessionNotes || '', cardio: session.cardio || {}})
       });
       return true;
     } catch(e) {
@@ -594,6 +620,7 @@ function renderHistory() {
     const sessHTML=daySessions.map(session => {
       const ds=new Date(session.date+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
       const durationStr = session.duration ? ` · ${session.duration} min` : '';
+      const sessionNotesStr = session.sessionNotes ? `<div style="margin-top:10px;padding:8px 10px;background:#fffdf0;border-radius:6px;border-left:3px solid #c9a030;font-size:13px;color:#333;font-style:italic">${session.sessionNotes}</div>` : '';
       const cardioStr = session.cardio && session.cardio.type ? 
         `<div style="margin-top:10px;padding:8px 10px;background:#f0f8ff;border-radius:6px;border-left:3px solid #0a5a8a;font-size:13px;color:#333">
           🚴 <strong>${session.cardio.type}</strong>${session.cardio.duration?' · '+session.cardio.duration+' min':''}${session.cardio.intensity?' · '+session.cardio.intensity:''}${session.cardio.notes?'<br><span style="color:#555;font-style:italic">'+session.cardio.notes+'</span>':''}
@@ -613,7 +640,7 @@ function renderHistory() {
           <div class="history-session-date">${ds} — ${session.dayName}${durationStr}</div>
           <div class="history-toggle">▾</div>
         </div>
-        <div class="history-session-body">${exHTML}${cardioStr}
+        <div class="history-session-body">${exHTML}${sessionNotesStr}${cardioStr}
           <button class="delete-btn" onclick="deleteSession(${session.id})">🗑 Delete Session</button>
         </div>
       </div>`;
