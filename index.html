@@ -507,13 +507,6 @@ async function saveWorkout() {
 
   const session = {id:Date.now(), date, duration, sessionNotes, cardio, dayIndex:selectedDay, dayName:day.name, exercises, synced:false};
 
-  const t=document.getElementById('toast');
-  t.textContent = `DEBUG: Notes="${sessionNotes}" (${sessionNotes.length} chars)`;
-  t.className = 'toast success';
-  t.classList.add('show');
-  await new Promise(r => setTimeout(r, 6000));
-  t.classList.remove('show');
-
   sessions.unshift(session);
   localStorage.setItem('gritiron60_v5', JSON.stringify(sessions));
   clearDraft();
