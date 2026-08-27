@@ -325,6 +325,23 @@ function init() {
   DAYS.forEach(d => d.exercises.forEach(ex => {
     const o = document.createElement('option'); o.value=ex.name; o.textContent=ex.name; sel.appendChild(o);
   }));
+  loadRemoteHistory();
+}
+
+// Pulls each exercise's most recent weight/reps straight from the Google Sheet.
+// This is the fallback source for "last time" numbers whenever this phone's
+// local history is empty (new device, cleared browser data, etc.) — the
+// Sheet is the durable source of truth, local storage is just a fast cache.
+let remoteLastPerformance = {};
+async function loadRemoteHistory() {
+  if (!APPS_SCRIPT_URL) return;
+  try {
+    const res = await fetch(APPS_SCRIPT_URL + '?action=lastPerformance');
+    remoteLastPerformance = await res.json();
+    if (selectedDay !== null) renderExercises(DAYS[selectedDay]);
+  } catch (e) {
+    console.error('Could not load remote history:', e);
+  }
 }
 
 // ═══════════════════════════════════════
@@ -347,10 +364,24 @@ function selectDay(i, btn) {
 
 // Finds the most recent saved session that logged this exercise (by name),
 // regardless of which day it fell on. Sessions are stored most-recent-first.
+// Falls back to remoteLastPerformance (pulled from the Google Sheet) when
+// this phone's local history has nothing — e.g. right after a cache clear.
 function getLastPerformance(exName) {
   for (const s of sessions) {
     const ex = s.exercises && s.exercises.find(e => e.name === exName);
     if (ex) return ex;
+  }
+  const remote = remoteLastPerformance[exName];
+  if (remote) {
+    const sets = [];
+    Object.keys(remote).forEach(setLabel => {
+      const idx = parseInt(setLabel.replace('Set ',''), 10) - 1;
+      if (!isNaN(idx)) sets[idx] = {
+        weight: (remote[setLabel].weight || '').replace(/\s*lbs\s*$/i, '').trim(),
+        reps: (remote[setLabel].reps || '').replace(/\s*reps\s*$/i, '').trim()
+      };
+    });
+    return { sets };
   }
   return null;
 }
