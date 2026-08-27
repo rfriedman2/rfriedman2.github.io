@@ -507,7 +507,8 @@ async function saveWorkout() {
 
   const session = {id:Date.now(), date, duration, sessionNotes, cardio, dayIndex:selectedDay, dayName:day.name, exercises, synced:false};
 
-  alert('DEBUG — about to save:\nSession Notes = "' + sessionNotes + '"\n(length: ' + sessionNotes.length + ' characters)');
+  setSyncStatus('syncing', `DEBUG: Notes="${sessionNotes}" (${sessionNotes.length} chars) — screenshot now`);
+  await new Promise(r => setTimeout(r, 5000));
 
   sessions.unshift(session);
   localStorage.setItem('gritiron60_v5', JSON.stringify(sessions));
