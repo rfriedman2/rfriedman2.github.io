@@ -300,6 +300,19 @@ const DAYS = [
   {
     num:'06', name:'Cardio', focus:'Any Day · As Needed',
     exercises:[]
+  },
+  {
+    num:'07', name:'Circuit', focus:'Optional · Supersets + 20 min Cardio',
+    cardioMins:20,
+    exercises:[
+      { name:'Lat Pulldown (Circuit)',       sets:2, reps:'20',       tempo:'2s return · 1s squeeze · 1s pull',  superset:'A1 · Superset with Machine Row' },
+      { name:'Machine Row (Circuit)',        sets:2, reps:'20',       tempo:'2s return · 1s squeeze · 1s pull',  superset:'A2 · Superset with Lat Pulldown' },
+      { name:'Incline Chest Machine (Circuit)', sets:2, reps:'12',    tempo:'3s lower · 1s pause · 1s press',    superset:'B1 · Superset with Pec Deck' },
+      { name:'Pec Deck (Circuit)',           sets:2, reps:'12',       tempo:'3s return · 1s squeeze · 1s close', superset:'B2 · Superset with Incline Chest Machine' },
+      { name:'Machine Hip Thrust (Circuit)', sets:2, reps:'15',       tempo:'2s lower · 1s squeeze · 1s drive',  superset:'C1 · Superset with Abductor' },
+      { name:'Abductor Machine (Circuit)',   sets:2, reps:'15',       tempo:'2s return · 1s squeeze · 1s open',  superset:'C2 · Superset with Hip Thrust' },
+      { name:'Leg Raises',                   sets:3, reps:'30',       tempo:'Controlled · no swinging',          superset:'Finisher — this one burns' },
+    ]
   }
 ];
 
@@ -355,6 +368,10 @@ function selectDay(i, btn) {
   const hint = document.getElementById('cardio-hint');
   if (DAYS[i].name === 'Cardio') {
     hint.textContent = 'Log your cardio session below';
+  } else if (DAYS[i].cardioMins) {
+    hint.textContent = `${DAYS[i].cardioMins} min cardio post-circuit`;
+    const cd = document.getElementById('cardio-duration');
+    if (!cd.value) cd.value = DAYS[i].cardioMins;
   } else {
     hint.textContent = 'Optional — log separately or as part of session';
   }
@@ -414,6 +431,7 @@ function renderExercises(day) {
       <div class="exercise-card-header">
         <div class="exercise-card-name">${ex.name}</div>
         <div class="exercise-card-meta">${ex.sets} sets · ${ex.reps} reps</div>
+        ${ex.superset ? `<div class="exercise-card-tempo" style="color:#7a5c0e">🔁 ${ex.superset}</div>` : ''}
         <div class="exercise-card-tempo">⏱ ${ex.tempo}</div>
       </div>
       <div class="exercise-card-body">${setsHTML}
