@@ -241,6 +241,7 @@ const DAYS = [
       { name:'Machine Chest Press',         sets:3, reps:'12-10-8',        tempo:'3s lower · 1s pause · 1s press' },
       { name:'Machine Incline Press',       sets:4, reps:'12',             tempo:'3s lower · 1s pause · 1s press' },
       { name:'Cable Fly (High-to-Low)',     sets:3, reps:'12',             tempo:'3s lower · 1s squeeze · 1s up' },
+      { name:'Cable Fly (Low-to-High)',     sets:3, reps:'12',             tempo:'3s lower · 1s squeeze · 1s up' },
       { name:'Pectoral Machine',            sets:3, reps:'12',             tempo:'3s lower · 1s squeeze · 1s up' },
       { name:'Dumbbell Pullover',           sets:3, reps:'12',             tempo:'3s lower · 1s hold · 1s return' },
     ]
@@ -251,6 +252,7 @@ const DAYS = [
       { name:'Cable Pullover (Opener)',      sets:3, reps:'10',             tempo:'3s lower · 1s squeeze · 1s return' },
       { name:'Lat Pulldown Wide Grip',       sets:4, reps:'12-10-8-8',     tempo:'3s return · 1s squeeze · 1s pull' },
       { name:'Seated Cable Row',            sets:4, reps:'12',             tempo:'3s return · 2s hold · 1s pull' },
+      { name:'T-Bar Row',                   sets:3, reps:'12',             tempo:'3s lower · 1s squeeze · 1s row' },
       { name:'Single-Arm Dumbbell Row',     sets:4, reps:'12-10-8-6',     tempo:'3s lower · 1s pause · 1s row' },
       { name:'Hammer Strength High Row',    sets:3, reps:'12',             tempo:'3s return · 1s squeeze · 1s pull' },
       { name:'Pull Ups',                    sets:3, reps:'12',             tempo:'2s lower · 1s hold top · 1s pull' },
@@ -291,6 +293,7 @@ const DAYS = [
       { name:'Military Press',              sets:3, reps:'10',         tempo:'3s lower · 1s pause · 1s press' },
       { name:'Cable Lateral Raise',         sets:4, reps:'15',         tempo:'3s lower · 1s hold top · 1s raise' },  
       { name:'Shoulder Flys',               sets:3, reps:'10',         tempo:'3s lower · 1s hold top · 1s raise' },
+      { name:'Shoulder Delts Machine',      sets:3, reps:'10',         tempo:'3s lower · 1s hold top · 1s raise' },
       { name:'Reverse Pec Deck',            sets:3, reps:'15',         tempo:'3s return · 1s squeeze · 1s open' },
       { name:'Cable Upright Row',           sets:3, reps:'12',         tempo:'3s lower · 1s hold · 1s pull' },
       { name:'Hanging Leg Lifts',           sets:4, reps:'10-12',      tempo:'3s lower · 1s pause · 1s raise' },
@@ -785,6 +788,27 @@ function showToast(msg, type='success') {
   t.textContent=msg; t.className=`toast ${type}`;
   t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500);
 }
+
+// ═══════════════════════════════════════
+// iOS SCROLL-JUMP GUARD
+// iOS Safari sometimes jumps the page to the bottom on each keystroke.
+// This remembers where you were when you typed and snaps back.
+// ═══════════════════════════════════════
+(function() {
+  let guardY = null, guardTime = 0;
+  function remember(e) {
+    if (e.target && e.target.matches && e.target.matches('input, textarea')) {
+      guardY = window.scrollY; guardTime = Date.now();
+    }
+  }
+  document.addEventListener('keydown', remember, true);
+  document.addEventListener('beforeinput', remember, true);
+  window.addEventListener('scroll', function() {
+    if (guardY === null) return;
+    if (Date.now() - guardTime > 600) { guardY = null; return; }
+    if (Math.abs(window.scrollY - guardY) > 120) window.scrollTo(0, guardY);
+  }, { passive: true });
+})();
 
 init();
 restoreDraft();
