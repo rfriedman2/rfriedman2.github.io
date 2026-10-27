@@ -173,7 +173,7 @@ body { background:#fff; color:#111; font-family:'Lato',sans-serif; font-size:17p
             <option value="Running">Running</option>
             <option value="Other">Other</option>
           </select>
-          <input type="number" class="set-input" id="cardio-duration" placeholder="mins" inputmode="numeric">
+          <input type="number" class="set-input" id="cardio-duration" placeholder="mins" inputmode="numeric" oninput="delete this.dataset.prefilled">
           <select id="cardio-intensity" class="set-input" style="font-size:15px;padding:10px 8px">
             <option value="">Level</option>
             <option value="Low">Low</option>
@@ -235,71 +235,71 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyXCKOkZsqZEYFf
 // ═══════════════════════════════════════
 const DAYS = [
   {
-    num:'01', name:'Chest', focus:'Push Day · Monday',
+    num:'01', name:'Upper A', focus:'Heavy Chest · Lighter Back · Monday',
     exercises:[
-      { name:'Incline Dumbbell Press',      sets:4, reps:'12-10-8-8',      tempo:'3s lower · 1s pause · 1s press' },
-      { name:'Machine Chest Press',         sets:3, reps:'12-10-8',        tempo:'3s lower · 1s pause · 1s press' },
-      { name:'Machine Incline Press',       sets:4, reps:'12',             tempo:'3s lower · 1s pause · 1s press' },
-      { name:'Cable Fly (High-to-Low)',     sets:3, reps:'12',             tempo:'3s lower · 1s squeeze · 1s up' },
-      { name:'Cable Fly (Low-to-High)',     sets:3, reps:'12',             tempo:'3s lower · 1s squeeze · 1s up' },
-      { name:'Pectoral Machine',            sets:3, reps:'12',             tempo:'3s lower · 1s squeeze · 1s up' },
-      { name:'Dumbbell Pullover',           sets:3, reps:'12',             tempo:'3s lower · 1s hold · 1s return' },
+      { name:'Incline Dumbbell Press',      sets:2, reps:'12',       tempo:'3s lower · 1s pause · 1s press', note:'Light — coordination & balance · palms slightly in' },
+      { name:'Machine Incline Press',       sets:3, reps:'12-10-8',  tempo:'3s lower · 1s pause · 1s press' },
+      { name:'Close-Grip Lat Pulldown',     sets:3, reps:'15-12-10', tempo:'3s return · 1s squeeze · 1s pull' },
+      { name:'Machine Chest Press',         sets:3, reps:'12-10-8',  tempo:'3s lower · 1s pause · 1s press', note:'Decline or flat machine' },
+      { name:'Seated Cable Row',            sets:3, reps:'15-12-10', tempo:'3s return · 2s hold · 1s pull' },
+      { prev:['Cable Pullover (Opener)'], name:'Rope Cable Pullover', sets:2, reps:'12-15', tempo:'3s return · 1s squeeze · 1s pull' },
+      { name:'Kneeling Cable Crunch',       sets:3, reps:'12-15',    tempo:'1s crunch · 1s hold · 3s return' },
     ]
   },
   {
-    num:'02', name:'Back', focus:'Pull Day · Wednesday',
+    num:'02', name:'Legs A', focus:'Quads · Heavier · Tuesday',
     exercises:[
-      { name:'Cable Pullover (Opener)',      sets:3, reps:'10',             tempo:'3s lower · 1s squeeze · 1s return' },
-      { name:'Lat Pulldown Wide Grip',       sets:4, reps:'12-10-8-8',     tempo:'3s return · 1s squeeze · 1s pull' },
-      { name:'Seated Cable Row',            sets:4, reps:'12',             tempo:'3s return · 2s hold · 1s pull' },
-      { name:'T-Bar Row',                   sets:3, reps:'12',             tempo:'3s lower · 1s squeeze · 1s row' },
-      { name:'Single-Arm Dumbbell Row',     sets:4, reps:'12-10-8-6',     tempo:'3s lower · 1s pause · 1s row' },
-      { name:'Hammer Strength High Row',    sets:3, reps:'12',             tempo:'3s return · 1s squeeze · 1s pull' },
-      { name:'Pull Ups',                    sets:3, reps:'12',             tempo:'2s lower · 1s hold top · 1s pull' },
-      { name:'Face Pulls',                  sets:3, reps:'20',             tempo:'2s return · 1s hold · 1s pull' },
+      { name:'Seated Leg Curl',             sets:3, reps:'8-10',     tempo:'3s return · 1s squeeze · 1s curl', note:'First — warms up the knees' },
+      { prev:['Leg Press + Drop Set'], name:'Hack Squat / Deep Leg Press', sets:4, reps:'12-10-8-8', tempo:'3s lower · 1s pause · 1s press', note:'Deep leg press for now · note which machine' },
+      { name:'Walking Lunges',              sets:3, reps:'10 each leg', tempo:'Controlled · upright torso' },
+      { prev:['Leg Extension (Opener)'], name:'Leg Extension', sets:3, reps:'10-12', tempo:'3s lower · 1s squeeze · 1s lift' },
+      { prev:['Adductor Machine + 10s Hold'], name:'Adductor Machine', sets:2, reps:'12', tempo:'3s return · 1s squeeze · 1s close' },
+      { name:'Standing Calf Raise',         sets:4, reps:'8-12',     tempo:'3s lower · 2s pause in stretch · 1s rise' },
+      { name:'Hanging Leg Lifts',           sets:3, reps:'max',      tempo:'3s lower · 1s pause · 1s raise' },
     ]
   },
   {
-    num:'03', name:'Legs', focus:'Full Lower Body · Thursday',
+    num:'03', name:'Shoulders & Arms', focus:'Delts · Triceps · Biceps · Wednesday',
     exercises:[
-      { name:'Leg Extension (Opener)',       sets:5, reps:'15-12-10-10-8', tempo:'3s lower · 1s squeeze · 1s lift' },
-      { name:'Leg Press + Drop Set',         sets:4, reps:'12-10-8-8+drop', tempo:'3s lower · 1s pause · 1s press' },
-      { name:'Romanian Deadlift',           sets:4, reps:'10-12',          tempo:'3s lower · 1s hold · 1s return' },
-      { name:'Seated Leg Curl',             sets:4, reps:'10 (grow wt)',   tempo:'3s return · 2s squeeze · 1s curl' },
-      { name:'Hip Thrust',                  sets:4, reps:'12',             tempo:'2s lower · 1s squeeze · 1s drive' },
-      { name:'Abductor Machine + 10s Hold', sets:4, reps:'12 + 10s hold', tempo:'Controlled + 10s isometric hold' },
-      { name:'Adductor Machine + 10s Hold', sets:4, reps:'12 + 10s hold', tempo:'Controlled + 10s isometric hold' },
-      { name:'Standing Calf Raise',         sets:4, reps:'15',             tempo:'3s lower · 1s hold top · 1s rise' },
+      { name:'Cable External Rotation',     sets:2, reps:'15 each arm', tempo:'Light · slow · 2s return', note:'Rotator cuff warm-up' },
+      { name:'Neutral-Grip DB Press',       sets:2, reps:'12',       tempo:'3s lower · 1s pause · 1s press', note:'Light — balance & control' },
+      { prev:['Military Press'], name:'Machine Shoulder Press', sets:3, reps:'12-10-8', tempo:'3s lower · 1s pause · 1s press', note:'Neutral grip if available · stop at ear level' },
+      { name:'Shoulder Flys',               sets:3, reps:'10-12',    tempo:'3s lower · 1s hold top · 1s raise', note:'Dumbbell side raises' },
+      { name:'Shoulder Delts Machine',      sets:3, reps:'12-15',    tempo:'3s lower · 1s hold top · 1s raise', note:'Machine lateral raise' },
+      { name:'Reverse Pec Deck',            sets:3, reps:'15',       tempo:'3s return · 1s squeeze · 1s open' },
+      { name:'Overhead Cable Tricep Ext.',  sets:3, reps:'10-12',    tempo:'3s lower · 1s pause · 1s extend' },
+      { name:'Tricep Rope Pushdown',        sets:3, reps:'12-15',    tempo:'3s return · 2s squeeze · 1s push' },
+      { name:'Hammer Curl',                 sets:3, reps:'10-12',    tempo:'3s lower · 1s pause · 1s curl', note:'Neutral grip · wear brace' },
+      { name:'Reverse Curl',                sets:2, reps:'12-15',    tempo:'3s lower · 1s pause · 1s curl', note:'Palms down · wear brace' },
+      { name:'Incline Dumbbell Curl',       sets:3, reps:'10',       tempo:'3s lower · 2s squeeze · 1s curl', paused:'Paused — elbow' },
+      { name:'Preacher Curl',               sets:3, reps:'10-12',    tempo:'3s lower · 1s squeeze · 1s curl', paused:'Paused — elbow' },
     ]
   },
   {
-    num:'04', name:'Arms', focus:'Biceps · Triceps · Forearms · Saturday',
+    num:'04', name:'Upper B', focus:'Heavy Back · Lighter Chest · Friday',
+    cardioMins:20,
     exercises:[
-      { name:'Tricep Rope Pushdown',         sets:4, reps:'12', tempo:'3s return · 2s squeeze · 1s push' },
-      { name:'EZ-Bar Lying Extension',       sets:4, reps:'12', tempo:'3s lower · 1s pause · 1s extend' },
-      { name:'Overhead Cable Tricep Ext.',   sets:3, reps:'12', tempo:'3s lower · 1s pause · 1s extend' },
-      { name:'Tricep Dip Machine',           sets:3, reps:'12', tempo:'3s return · 2s squeeze · 1s push' },
-      { name:'EZ-Bar Curl',                  sets:4, reps:'10-12', tempo:'3s lower · 1s squeeze · 1s curl' },
-      { name:'Incline Dumbbell Curl',        sets:4, reps:'10', tempo:'3s lower · 2s squeeze · 1s curl' },
-      { name:'Preacher Curl',                sets:3, reps:'12', tempo:'3s lower · 1s squeeze · 1s curl' },
-      { name:'Hammer Curl',                  sets:3, reps:'12', tempo:'3s lower · 1s pause · 1s curl' },
-      { name:'Reverse Curl',                 sets:3, reps:'15', tempo:'3s lower · 1s pause · 1s curl' },
+      { name:'Chest-Supported Row',         sets:3, reps:'12-10-8',  tempo:'3s return · 1s squeeze · 1s row' },
+      { name:'Cable Fly (Low-to-High)',     sets:3, reps:'12-15',    tempo:'3s lower · 1s squeeze · 1s up' },
+      { name:'Lat Pulldown Wide Grip',      sets:3, reps:'12-10-8',  tempo:'3s return · 1s squeeze · 1s pull' },
+      { name:'Pectoral Machine',            sets:3, reps:'12-15',    tempo:'3s return · 1s squeeze · 1s close' },
+      { name:'Single-Arm Dumbbell Row',     sets:2, reps:'10-12',    tempo:'3s lower · 1s pause · 1s row', note:'Use straps' },
+      { name:'Cable Fly (High-to-Low)',     sets:3, reps:'12-15',    tempo:'3s lower · 1s squeeze · 1s up' },
+      { name:'Cable Lateral Raise',         sets:3, reps:'15',       tempo:'3s lower · 1s hold top · 1s raise' },
+      { name:'Reverse Pec Deck',            sets:2, reps:'15',       tempo:'3s return · 1s squeeze · 1s open' },
+      { name:'Pull Ups',                    sets:3, reps:'8-12',     tempo:'2s lower · 1s hold top · 1s pull', note:'Assisted machine · neutral grip · wear brace · stop if elbow hurts' },
     ]
   },
   {
-    num:'05', name:'Shoulders & Abs', focus:'Overhead Push · Sunday',
+    num:'05', name:'Legs B', focus:'Hamstrings & Glutes · Higher Reps · Saturday',
     exercises:[
-      { name:'Seated Arnold Press',          sets:4, reps:'12-10-8-8', tempo:'3s lower · 1s rotate · 1s press' },
-      { name:'Military Press',              sets:3, reps:'10',         tempo:'3s lower · 1s pause · 1s press' },
-      { name:'Cable Lateral Raise',         sets:4, reps:'15',         tempo:'3s lower · 1s hold top · 1s raise' },  
-      { name:'Shoulder Flys',               sets:3, reps:'10',         tempo:'3s lower · 1s hold top · 1s raise' },
-      { name:'Shoulder Delts Machine',      sets:3, reps:'10',         tempo:'3s lower · 1s hold top · 1s raise' },
-      { name:'Reverse Pec Deck',            sets:3, reps:'15',         tempo:'3s return · 1s squeeze · 1s open' },
-      { name:'Cable Upright Row',           sets:3, reps:'12',         tempo:'3s lower · 1s hold · 1s pull' },
-      { name:'Hanging Leg Lifts',           sets:4, reps:'10-12',      tempo:'3s lower · 1s pause · 1s raise' },
-      { name:'Kneeling Cable Crunch',       sets:3, reps:'20',         tempo:'1s crunch · 1s hold · 3s return' },
-      { name:'Reverse Crunches',            sets:4, reps:'10-12',      tempo:'3s lower · 1s pause · 1s raise' },
-      { name:'Dead Bug',                    sets:3, reps:'10 each',    tempo:'3s extend · 1s pause · 1s return' },
+      { name:'Romanian Deadlift',           sets:3, reps:'12-10-8',  tempo:'3s lower · 1s hold · 1s return', note:'45° back extension if low back complains' },
+      { name:'Leg Press (Feet High & Wide)', sets:3, reps:'15-12-10', tempo:'3s lower · 1s pause · 1s press' },
+      { name:'Hip Thrust',                  sets:3, reps:'12-10-8',  tempo:'2s lower · 1s squeeze · 1s drive' },
+      { name:'Seated Leg Curl (High Rep)',  sets:3, reps:'12-15',    tempo:'3s return · 1s squeeze · 1s curl' },
+      { name:'Leg Extension (High Rep)',    sets:2, reps:'15-20',    tempo:'3s lower · 1s squeeze · 1s lift' },
+      { prev:['Abductor Machine + 10s Hold'], name:'Abductor Machine', sets:2, reps:'15', tempo:'3s return · 1s squeeze · 1s open' },
+      { name:'Standing Calf Raise (High Rep)', sets:4, reps:'12-15', tempo:'3s lower · 2s pause in stretch · 1s rise' },
     ]
   },
   {
@@ -321,6 +321,16 @@ const DAYS = [
   }
 ];
 
+// prev:[...] lists an exercise's old name(s) so its history carries over.
+function exNames(ex) { return [ex.name].concat(ex.prev || []); }
+// For a declining scheme like 12-10-8, show each set's own target (12, then 10, then 8).
+function setTarget(ex, s) {
+  const parts = String(ex.reps).split('-');
+  return (parts.length === ex.sets && parts.every(x => /^\d+$/.test(x.trim()))) ? parts[s].trim() : ex.reps;
+}
+// Exercises marked paused are shown greyed out with no inputs and are not logged.
+function activeEx(day) { return day.exercises.filter(e => !e.paused); }
+
 let selectedDay = null;
 let sessions = JSON.parse(localStorage.getItem('gritiron60_v5') || '[]');
 
@@ -340,7 +350,9 @@ function init() {
     grid.appendChild(btn);
   });
   const sel = document.getElementById('progress-ex-select');
+  const seen = new Set();
   DAYS.forEach(d => d.exercises.forEach(ex => {
+    if (seen.has(ex.name)) return; seen.add(ex.name);
     const o = document.createElement('option'); o.value=ex.name; o.textContent=ex.name; sel.appendChild(o);
   }));
   loadRemoteHistory();
@@ -371,12 +383,14 @@ function selectDay(i, btn) {
   selectedDay = i;
   renderExercises(DAYS[i]);
   const hint = document.getElementById('cardio-hint');
+  const cd = document.getElementById('cardio-duration');
+  // Clear a cardio time the app filled in for a previous day (not one you typed)
+  if (cd.dataset.prefilled) { cd.value = ''; delete cd.dataset.prefilled; }
   if (DAYS[i].name === 'Cardio') {
     hint.textContent = 'Log your cardio session below';
   } else if (DAYS[i].cardioMins) {
-    hint.textContent = `${DAYS[i].cardioMins} min cardio post-circuit`;
-    const cd = document.getElementById('cardio-duration');
-    if (!cd.value) cd.value = DAYS[i].cardioMins;
+    hint.textContent = `${DAYS[i].cardioMins} min cardio after lifting`;
+    if (!cd.value) { cd.value = DAYS[i].cardioMins; cd.dataset.prefilled = '1'; }
   } else {
     hint.textContent = 'Optional — log separately or as part of session';
   }
@@ -388,12 +402,14 @@ function selectDay(i, btn) {
 // regardless of which day it fell on. Sessions are stored most-recent-first.
 // Falls back to remoteLastPerformance (pulled from the Google Sheet) when
 // this phone's local history has nothing — e.g. right after a cache clear.
-function getLastPerformance(exName) {
+function getLastPerformance(exDef) {
+  const names = exNames(exDef);
   for (const s of sessions) {
-    const ex = s.exercises && s.exercises.find(e => e.name === exName);
+    const ex = s.exercises && s.exercises.find(e => names.includes(e.name));
     if (ex) return ex;
   }
-  const remote = remoteLastPerformance[exName];
+  const remoteName = names.find(n => remoteLastPerformance[n]);
+  const remote = remoteName && remoteLastPerformance[remoteName];
   if (remote) {
     const sets = [];
     Object.keys(remote).forEach(setLabel => {
@@ -411,12 +427,12 @@ function getLastPerformance(exName) {
 function renderExercises(day) {
   const c = document.getElementById('exercises-container');
   c.innerHTML = '';
-  if (!day.exercises.length) {
+  if (!activeEx(day).length) {
     c.innerHTML = '<div class="empty-exercises">No target exercises for this day — log your cardio session below.</div>';
     return;
   }
-  day.exercises.forEach((ex, ei) => {
-    const lastEx = getLastPerformance(ex.name);
+  activeEx(day).forEach((ex, ei) => {
+    const lastEx = getLastPerformance(ex);
     let setsHTML = `<div class="col-header"><span></span><span>Wt (lbs)</span><span>Reps</span><span>✓</span></div>`;
     for (let s=0; s<ex.sets; s++) {
       const lastSet = lastEx && lastEx.sets && lastEx.sets[s];
@@ -426,7 +442,7 @@ function renderExercises(day) {
       setsHTML += `<div class="set-row">
         <div class="set-label">S${s+1}${lastLine}</div>
         <input type="number" class="set-input" placeholder="lbs" id="e${ei}s${s}w" inputmode="decimal">
-        <input type="number" class="set-input" placeholder="${ex.reps}" id="e${ei}s${s}r" inputmode="numeric">
+        <input type="number" class="set-input" placeholder="${setTarget(ex, s)}" id="e${ei}s${s}r" inputmode="numeric">
         <div class="set-check" id="e${ei}s${s}c" onclick="toggleCheck(${ei},${s})">✓</div>
       </div>`;
     }
@@ -437,6 +453,7 @@ function renderExercises(day) {
         <div class="exercise-card-name">${ex.name}</div>
         <div class="exercise-card-meta">${ex.sets} sets · ${ex.reps} reps</div>
         ${ex.superset ? `<div class="exercise-card-tempo" style="color:#7a5c0e">🔁 ${ex.superset}</div>` : ''}
+        ${ex.note ? `<div class="exercise-card-tempo" style="color:#555">📝 ${ex.note}</div>` : ''}
         <div class="exercise-card-tempo">⏱ ${ex.tempo}</div>
       </div>
       <div class="exercise-card-body">${setsHTML}
@@ -452,6 +469,16 @@ function renderExercises(day) {
       }
     }, 100);
     c.appendChild(card);
+  });
+  day.exercises.filter(e => e.paused).forEach(ex => {
+    const p = document.createElement('div');
+    p.className = 'exercise-card';
+    p.style.opacity = '0.5';
+    p.innerHTML = `<div class="exercise-card-header" style="border-bottom:none">
+        <div class="exercise-card-name">⏸ ${ex.name}</div>
+        <div class="exercise-card-meta" style="color:#888">${ex.sets} sets · ${ex.reps} reps · ${ex.paused}</div>
+      </div>`;
+    c.appendChild(p);
   });
 }
 
@@ -471,7 +498,7 @@ function saveDraft() {
     dayIndex: selectedDay,
     date: date,
     sessionNotes: document.getElementById('session-notes')?.value || '',
-    exercises: day.exercises.map((ex, ei) => ({
+    exercises: activeEx(day).map((ex, ei) => ({
       sets: Array.from({length: ex.sets}, (_, s) => ({
         weight: document.getElementById(`e${ei}s${s}w`)?.value || '',
         reps:   document.getElementById(`e${ei}s${s}r`)?.value || '',
@@ -480,11 +507,11 @@ function saveDraft() {
       notes: document.getElementById(`e${ei}n`)?.value || ''
     }))
   };
-  localStorage.setItem('gritiron60_draft', JSON.stringify(draft));
+  localStorage.setItem('gritiron60_draft_v2', JSON.stringify(draft));
 }
 
 function restoreDraft() {
-  const draftStr = localStorage.getItem('gritiron60_draft');
+  const draftStr = localStorage.getItem('gritiron60_draft_v2');
   if (!draftStr) return;
   try {
     const draft = JSON.parse(draftStr);
@@ -519,7 +546,7 @@ function restoreDraft() {
 }
 
 function clearDraft() {
-  localStorage.removeItem('gritiron60_draft');
+  localStorage.removeItem('gritiron60_draft_v2');
 }
 
 setInterval(() => {
@@ -544,12 +571,12 @@ async function saveWorkout() {
 
   const day = DAYS[selectedDay];
 
-  if (!day.exercises.length && !cardio.type) {
+  if (!activeEx(day).length && !cardio.type) {
     alert('Please select a cardio type before saving a Cardio session.');
     return;
   }
 
-  const exercises = day.exercises.map((ex, ei) => ({
+  const exercises = activeEx(day).map((ex, ei) => ({
     name: ex.name, targetSets: ex.sets, targetReps: ex.reps, tempo: ex.tempo,
     sets: Array.from({length:ex.sets}, (_,s) => ({
       weight: document.getElementById(`e${ei}s${s}w`).value||'',
@@ -589,7 +616,7 @@ async function saveWorkout() {
   document.getElementById('cardio-duration').value = '';
   document.getElementById('cardio-intensity').value = '';
   document.getElementById('cardio-notes').value = '';
-  day.exercises.forEach((ex,ei) => {
+  activeEx(day).forEach((ex,ei) => {
     for (let s=0;s<ex.sets;s++) {
       document.getElementById(`e${ei}s${s}w`).value='';
       document.getElementById(`e${ei}s${s}r`).value='';
@@ -744,8 +771,10 @@ function renderProgress() {
   const c=document.getElementById('progress-container');
   if(!exName){c.innerHTML='';return;}
   const pts=[];
+  let names=[exName];
+  DAYS.forEach(d=>d.exercises.forEach(e=>{ if(e.name===exName) names=names.concat(e.prev||[]); }));
   sessions.forEach(session => {
-    const ex=session.exercises.find(e=>e.name===exName); if(!ex) return;
+    const ex=session.exercises.find(e=>names.includes(e.name)); if(!ex) return;
     const weights=ex.sets.filter(s=>s.weight&&s.done).map(s=>parseFloat(s.weight)).filter(w=>!isNaN(w));
     if(!weights.length) return;
     pts.push({date:session.date, maxW:Math.max(...weights)});
