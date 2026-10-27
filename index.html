@@ -584,7 +584,15 @@ async function saveWorkout() {
       done:   document.getElementById(`e${ei}s${s}c`).classList.contains('done')
     })),
     notes: document.getElementById(`e${ei}n`).value||''
-  }));
+  }))
+  // Keep only exercises you actually logged, so a workout saved in two parts
+  // never sends blanks over the first part (and "last time" stays accurate).
+  .filter(ex => ex.sets.some(st => st.weight || st.reps || st.done) || ex.notes);
+
+  if (!exercises.length && !cardio.type) {
+    alert('Nothing entered yet — log at least one set (or a cardio type) before saving.');
+    return;
+  }
 
   const session = {id:Date.now(), date, duration, sessionNotes, cardio, dayIndex:selectedDay, dayName:day.name, exercises, synced:false};
 
@@ -632,6 +640,7 @@ async function syncToSheets(session) {
 
   session.exercises.forEach(ex => {
     ex.sets.forEach((set, i) => {
+      if (!set.weight && !set.reps && !set.done) return; // skip sets left blank
       rows.push([
         dateStr,
         session.dayName,
